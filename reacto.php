@@ -326,6 +326,9 @@ function reacto_block_init()
 }
 add_action("init", "reacto_block_init");
 
+//Wordpress Custom Gutenberg Block render_callback
+//Below link is the reference for the solution I get for the Gutenberg Block Render to the front-end
+//https://stackoverflow.com/questions/65592336/wordpress-custom-gutenberg-block-render-callback-doesnt-render
 function render_on_frontend()
 {
     $shortcode = do_shortcode(shortcode_unautop("[custom_reactions]"));
