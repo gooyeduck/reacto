@@ -1,0 +1,25 @@
+.custom-reactions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.custom-reactions .custom-reaction {
+  display: flex;
+  align-items: center;
+  margin-right: 10px;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.custom-reaction i {
+  margin-right: 5px;
+}
+
+.custom-reaction .reaction-label {
+  margin-left: 5px;
+}
+
+.custom-reaction.clicked i {
+  color: #0073aa;
+}
