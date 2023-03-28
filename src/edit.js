@@ -21,7 +21,13 @@ import { TextControl, Placeholder } from '@wordpress/components';
  */
 import './editor.scss';
 import '../assets/css/custom-reactions.css';
+import ReactDOM from 'react-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faFaceSmile,
+  faFaceMeh,
+  faFaceFrown,
+} from '@fortawesome/free-regular-svg-icons';
 
 /**
  * The edit function describes the structure of your block in the context of the
@@ -40,7 +46,7 @@ export default function Edit({ attributes, isSelected, setAttributes }) {
           data-reaction-type="smile"
           data-count="3"
         >
-          <p>🙂</p>
+          <FontAwesomeIcon icon={faFaceSmile} />
           <span class="reaction-label">Smile</span>
         </span>
         <span
@@ -48,7 +54,7 @@ export default function Edit({ attributes, isSelected, setAttributes }) {
           data-reaction-type="straight"
           data-count="0"
         >
-          <p>😐</p>
+          <FontAwesomeIcon icon={faFaceMeh} />
           <span class="reaction-label">Straight</span>
         </span>
         <span
@@ -56,7 +62,7 @@ export default function Edit({ attributes, isSelected, setAttributes }) {
           data-reaction-type="sad"
           data-count="0"
         >
-          <p>🙁</p>
+          <FontAwesomeIcon icon={faFaceFrown} />
           <span class="reaction-label">Sad</span>
         </span>
       </div>
