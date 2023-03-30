@@ -48,7 +48,7 @@
             }
           }
           $this.addClass('clicked');
-          $this.data('count', (count + 1));
+          $this.data('count', count + 1);
           $this.find('.reaction-label').text($this.data('count') + ' Vote(s)');
         });
       } else {
@@ -67,15 +67,17 @@
           current_user: reacto_reactions,
         },
         success: function (response) {
-          // $this.data('count', ++count);
-          // $this.find('.reaction-label').text(count + ' Vote(s)');
+          if (response.success) {
+            $this.data('count', ++count);
+            $this.find('.reaction-label').text(count + ' Vote(s)');
+          } else {
+            console.log(response);
+          }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          console.log(textStatus + ': ' + errorThrown);
         },
       });
-    });
-
-    $('.reaction-count').each(function () {
-      var count = $(this).data('reaction-count');
-      $(this).text(count + ' Votes');
     });
   });
 })(jQuery);

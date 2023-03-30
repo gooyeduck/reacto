@@ -115,11 +115,6 @@ function reacto_get_reaction_icon(
     $current_post_id,
 ) {
     
-    
-    // error_log($reaction_type);
-    // error_log($db_reaction);
-    // error_log($current_post_id);
-    // error_log($db_post_id);
     $icon_html = "";
     switch ($reaction_type) {
         case "smile":
@@ -169,8 +164,6 @@ function reacto_enqueue_reactions_assets()
         plugin_dir_url(__FILE__) . "assets/css/custom-reactions.css"
     );
 
-    //wp_enqueue_script('jquery');
-
     wp_enqueue_script(
         "custom-reactions",
         plugin_dir_url(__FILE__) . "assets/scripts/custom-reactions.js",
@@ -185,7 +178,6 @@ function reacto_enqueue_reactions_assets()
         "current_post" => get_the_ID(),
         "nonce" => wp_create_nonce("custom_reaction"),
     ]);
-    //error_log(print_r(wp_get_current_user(),1));
 }
 
 // Function for submitting a reaction
@@ -226,7 +218,6 @@ function reacto_submit_custom_reaction()
             // Return a success response with the updated reaction count
             $response = [
                 "success" => true,
-                "count" => reacto_get_reaction_count($current_reaction_type),
                 "message" => "Reaction Submitted",
             ];
             wp_send_json($response);
@@ -234,7 +225,6 @@ function reacto_submit_custom_reaction()
             // Return an error response with the current reaction count
             $response = [
                 "success" => false,
-                "count" => reacto_get_reaction_count($current_reaction_type),
                 "message" => "Reaction Not Submitted",
             ];
             wp_send_json($response);
@@ -262,9 +252,6 @@ function reacto_submit_custom_reaction()
             if ($result != false) {
                 $response = [
                     "success" => true,
-                    "count" => reacto_get_reaction_count(
-                        $current_reaction_type
-                    ),
                     "message" => "Reaction Updated",
                 ];
             } else {
@@ -283,9 +270,6 @@ function reacto_submit_custom_reaction()
             if ($result != false) {
                 $response = [
                     "success" => true,
-                    "count" => reacto_get_reaction_count(
-                        $current_reaction_type
-                    ),
                     "message" => "Reaction Deleted For Current User",
                 ];
             }
