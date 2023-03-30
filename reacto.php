@@ -6,6 +6,20 @@ Version: 1.0
 Author: Satyajit Talukder
 License: GPL2 or later
  */
+
+
+
+register_activation_hook(__FILE__, "reacto_create_table");
+
+// Enqueue the necessary styles and scripts
+add_action("wp_enqueue_scripts", "reacto_enqueue_reactions_assets", 10);
+
+// Register AJAX handlers for updating reactions
+add_action(
+    "wp_ajax_custom_reaction_submission",
+    "reacto_submit_custom_reaction"
+);
+
 // Creation of the
 function reacto_create_table()
 {
@@ -24,23 +38,20 @@ function reacto_create_table()
             PRIMARY KEY  (id)
         ) $charset_collate;";
 
-        require_once ABSPATH . "wp-admin/includes/upgrade.php";
         dbDelta($sql);
         update_option("reaction_db_table", 1);
     }
 }
 
-register_activation_hook(__FILE__, "reacto_create_table");
-
-// Enqueue the necessary styles and scripts
-add_action("wp_enqueue_scripts", "reacto_enqueue_reactions_assets", 10);
-
-// Register AJAX handlers for updating reactions
-add_action(
-    "wp_ajax_custom_reaction_submission",
-    "reacto_submit_custom_reaction"
-);
-
+// Function for getting the reaction count
+function reacto_get_reaction_count($reaction, $post_id)
+{
+    global $wpdb;
+    $count = $wpdb->get_var(
+        "SELECT COUNT(*) FROM {$wpdb->prefix}user_reactions WHERE post_id={$post_id} AND reaction='{$reaction}'"
+    );
+    return $count;
+}
 
 // Function for rendering the shortcode
 function reacto_custom_reactions_shortcode()
@@ -54,11 +65,12 @@ function reacto_custom_reactions_shortcode()
         "SELECT reaction, post_id, user_id from {$wpdb->prefix}user_reactions WHERE user_id = {$current_user_id} AND post_id = {$current_post_id}"
     );
     $data_reaction = isset($data[0]) ? (string) $data[0]->reaction : "";
+    error_log($data_reaction);
     $data_post_id = isset($data[0]) ? (int) $data[0]->post_id : "";
     $data_post_user_id = isset($data[0]) ? (int) $data[0]->user_id : "";
-    $smile_count = reacto_get_reaction_count("smile");
-    $straight_count = reacto_get_reaction_count("straight");
-    $sad_count = reacto_get_reaction_count("sad");
+    $smile_count = reacto_get_reaction_count("smile",$current_post_id);
+    $straight_count = reacto_get_reaction_count("straight",$current_post_id);
+    $sad_count = reacto_get_reaction_count("sad",$current_post_id);
     $output = '<div class="custom-reactions">';
     $output .=
         '<span class="custom-reaction smile' .
@@ -68,11 +80,7 @@ function reacto_custom_reactions_shortcode()
         '">' .
         reacto_get_reaction_icon(
             "smile",
-            $data_reaction,
             $current_post_id,
-            $data_post_id,
-            $current_user_id,
-            $data_post_user_id
         ) .
         "</span>";
     $output .=
@@ -83,11 +91,7 @@ function reacto_custom_reactions_shortcode()
         '">' .
         reacto_get_reaction_icon(
             "straight",
-            $data_reaction,
-            $current_post_id,
-            $data_post_id,
-            $current_user_id,
-            $data_post_user_id
+            $current_post_id
         ) .
         "</span>";
     $output .=
@@ -98,11 +102,7 @@ function reacto_custom_reactions_shortcode()
         '">' .
         reacto_get_reaction_icon(
             "sad",
-            $data_reaction,
-            $current_post_id,
-            $data_post_id,
-            $current_user_id,
-            $data_post_user_id
+            $current_post_id
         ) .
         "</span>";
     $output .= "</div>";
@@ -112,41 +112,43 @@ function reacto_custom_reactions_shortcode()
 // Function for getting the reaction icon HTML
 function reacto_get_reaction_icon(
     $reaction_type,
-    $db_reaction = "",
     $current_post_id,
-    $db_post_id,
-    $current_user_id,
-    $db_user_id
 ) {
+    
+    
+    // error_log($reaction_type);
+    // error_log($db_reaction);
+    // error_log($current_post_id);
+    // error_log($db_post_id);
     $icon_html = "";
     switch ($reaction_type) {
         case "smile":
+            $smile_count = reacto_get_reaction_count("smile",$current_post_id);
             $icon_html .=
                 '<i class="fa fa-smile-o" aria-hidden="true"></i><span class="reaction-label">' .
-                ($reaction_type == $db_reaction &&
-                $current_post_id == $db_post_id &&
-                $current_user_id == $db_user_id
-                    ? "1 Vote(s)"
+                (
+                $smile_count>0?
+                $smile_count." Vote(s)"
                     : "Smile") .
                 "</span>";
             break;
         case "straight":
+            $straight_count = reacto_get_reaction_count("straight",$current_post_id);
             $icon_html .=
                 '<i class="fa fa-meh-o" aria-hidden="true"></i><span class="reaction-label">' .
-                ($reaction_type == $db_reaction &&
-                $current_post_id == $db_post_id &&
-                $current_user_id == $db_user_id
-                    ? "1 Vote(s)"
+                (
+                $straight_count>0
+                    ? $straight_count." Vote(s)"
                     : "Straight") .
                 "</span>";
             break;
         case "sad":
+            $sad_count = reacto_get_reaction_count("sad",$current_post_id);
             $icon_html .=
                 '<i class="fa fa-frown-o" aria-hidden="true"></i><span class="reaction-label">' .
-                ($reaction_type == $db_reaction &&
-                $current_post_id == $db_post_id &&
-                $current_user_id == $db_user_id
-                    ? "1 Vote(s)"
+                (
+                $sad_count>0
+                    ? $sad_count." Vote(s)"
                     : "Sad") .
                 "</span>";
             break;
@@ -154,15 +156,6 @@ function reacto_get_reaction_icon(
     return $icon_html;
 }
 
-// Function for getting the reaction count
-function reacto_get_reaction_count($reaction)
-{
-    global $wpdb;
-    $count = $wpdb->get_var(
-        "SELECT COUNT(*) FROM {$wpdb->prefix}user_reactions WHERE reaction='{$reaction}'"
-    );
-    return $count;
-}
 
 // Function for enqueuing the stylesheet and JavaScript
 function reacto_enqueue_reactions_assets()
@@ -303,10 +296,7 @@ add_action(
     "wp_ajax_reacto_submit_custom_reaction",
     "reacto_submit_custom_reaction"
 );
-add_action(
-    "wp_ajax_nopriv_reacto_submit_custom_reaction",
-    "reacto_submit_custom_reaction"
-); // Allow non-logged-in users to access the endpoint
+ 
 
 //Elementor addon Register
 function register_reacto_widget($widgets_manager)
