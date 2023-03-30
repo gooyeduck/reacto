@@ -4,38 +4,57 @@
     $('.custom-reaction').on('click', function () {
       var $this = $(this);
       var reaction_type = $this.data('reaction-type');
-      var reaction_count = $this.data('data');
+      var count = $this.data('count');
       var allClass = $('.custom-reaction');
       var nonce = reacto_reactions.nonce;
 
       if ($this.hasClass('clicked')) {
+        // Remove the clicked class and update the reaction label
         $this.removeClass('clicked');
-        let firstLetter = $this
+        var firstLetter = $this
           .attr('data-reaction-type')
           .charAt(0)
           .toUpperCase();
-        let join_remaining_letters =
+        var join_remaining_letters =
           firstLetter + '' + $this.attr('data-reaction-type').slice(1);
-        $this.find('.reaction-label').text(join_remaining_letters);
-        console.log($this.attr('data-reaction-type'));
+
+        if (count > 1) {
+          $this.data('count', count - 1);
+          $this.find('.reaction-label').text($this.data('count') + ' Vote(s)');
+        } else {
+          $this.data('count', 0);
+          $this.find('.reaction-label').text(join_remaining_letters);
+        }
       } else if (allClass.hasClass('clicked')) {
-        allClass.each(function (index) {
+        allClass.each(function () {
           if ($(this).hasClass('clicked')) {
             $(this).removeClass('clicked');
+            let previousCount = parseInt($(this).data('count'));
             let firstLetter = $(this)
               .attr('data-reaction-type')
               .charAt(0)
               .toUpperCase();
             let join_remaining_letters =
               firstLetter + '' + $(this).attr('data-reaction-type').slice(1);
-            $(this).find('.reaction-label').text(join_remaining_letters);
+
+            if (previousCount > 1) {
+              $(this).data('count', previousCount - 1);
+              $(this)
+                .find('.reaction-label')
+                .text($(this).data('count') + ' Vote(s)');
+            } else {
+              $(this).data('count', 0);
+              $(this).find('.reaction-label').text(join_remaining_letters);
+            }
           }
           $this.addClass('clicked');
-          $this.find('.reaction-label').text('1 Vote(s)');
+          $this.data('count', (count + 1));
+          $this.find('.reaction-label').text($this.data('count') + ' Vote(s)');
         });
       } else {
         $this.addClass('clicked');
-        $this.find('.reaction-label').text('1 Vote(s)');
+        $this.data('count', count + 1);
+        $this.find('.reaction-label').text($this.data('count') + ' Vote(s)');
       }
 
       $.ajax({
