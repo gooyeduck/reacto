@@ -37,7 +37,7 @@ function reacto_create_table()
             reaction VARCHAR(255) NOT NULL,
             PRIMARY KEY  (id)
         ) $charset_collate;";
-
+        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql);
         update_option("reaction_db_table", 1);
     }
