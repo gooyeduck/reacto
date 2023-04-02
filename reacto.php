@@ -80,7 +80,7 @@ function reacto_custom_reactions_shortcode()
         '">' .
         reacto_get_reaction_icon(
             "smile",
-            $current_post_id,
+            $current_post_id
         ) .
         "</span>";
     $output .=
@@ -112,7 +112,7 @@ function reacto_custom_reactions_shortcode()
 // Function for getting the reaction icon HTML
 function reacto_get_reaction_icon(
     $reaction_type,
-    $current_post_id,
+    $current_post_id
 ) {
     
     $icon_html = "";
